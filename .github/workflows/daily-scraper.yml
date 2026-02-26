@@ -1,0 +1,29 @@
+name: Daily WatchDNA Scraper
+
+on:
+  schedule:
+    - cron: "0 4 * * *"
+  workflow_dispatch:
+
+jobs:
+  scrape-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install requests beautifulsoup4
+
+      - name: Run scraper
+        env:
+          SHOPIFY_URL: https://watchdna.com
+        run: python scraper.py
+
+      - name: Trigger Railway redeploy
+        run: curl -X POST "${{ secrets.RAILWAY_DEPLOY_HOOK }}"
